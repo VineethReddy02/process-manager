@@ -20,7 +20,7 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
       - name: Build
-        uses: go build -o ./../../bin/process-manager ./../../example
+        run: go build -o ./../../bin/process-manager ./../../example
       - name: Test
-        uses: go test ./../../modules/manager
+        run: go test ./../../modules/manager
 
