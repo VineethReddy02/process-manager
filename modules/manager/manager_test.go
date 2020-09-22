@@ -35,6 +35,9 @@ func TestManager_Start_Stop_Processes(t *testing.T) {
 						Name: "echo",
 						Args: []string{"abc"},
 					},
+					{
+						Name: "vineeth",
+					},
 				},
 				Restarts: 2,
 			},

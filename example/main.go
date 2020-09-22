@@ -24,22 +24,20 @@ func main() {
 			Name: "echo",
 			Args: []string{"abc"},
 		},
+		{
+			Name: "abc",
+		},
 	}
 
-	m := manager.New(processes, 3)
+	m := manager.New(processes, 5)
 
 	go func() {
 		m.StartProcesses()
 	}()
 
-	counter := 0
-	for {
-		// sleep for 3 secs before killing the process
+	for i:=0; i<5; i++ {
+		// sleep for 2 secs before killing the process
 		time.Sleep(2 * time.Second)
 		m.StopProcesses()
-		if counter == 5 {
-			break
-		}
-		counter++
 	}
 }

@@ -31,36 +31,37 @@ func New(p *Process) Process {
 }
 
 // Start the process
-func (p *Process) Start() {
+func (p *Process) Start() error {
 	var stdout, stderr bytes.Buffer
 	p.Command.Stdout = &stdout
 	p.Command.Stderr = &stderr
 	err := p.Command.Start()
 	if err != nil {
 		// we failed to start the process
-		fmt.Println(fmt.Sprintf("Failed to create the process for %s", p.Name))
-		return
+		return err
 	}
-	fmt.Println(fmt.Sprintf("Created the process for %s with args as %v PID as %v", p.Name, p.Args, p.Command.Process.Pid))
+	fmt.Printf("Created the process for %s with args as %v PID as %v and the restart count as %v\n",
+		p.Name, p.Args, p.Command.Process.Pid, p.Restarts)
 
 	err = p.Command.Wait()
 	if err != nil {
 		// process is killed
-		fmt.Println(fmt.Sprintf("Process %s is crashed", p.Name))
+		fmt.Printf("Process %s is crashed\n", p.Name)
 		p.Crashed <- struct{}{}
-		return
+		return nil
 	}
 
-	fmt.Println(fmt.Sprintf("\nProcess %s is successfully completed", p.Name))
+	fmt.Printf("Process %s is successfully completed\n", p.Name)
 	p.Complete <- struct{}{}
-
+	return err
 }
 
 // Stop the process
-func (p *Process) Stop() {
+func (p *Process) Stop() error {
 	err := p.Command.Process.Kill()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Failed to kill the process %s", err))
+		return err
 	}
-	fmt.Println(fmt.Sprintf("Successfully killed process %s with args %v", p.Name, p.Args))
+	fmt.Printf("Successfully killed process %s with args %v\n", p.Name, p.Args)
+	return err
 }

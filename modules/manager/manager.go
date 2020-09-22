@@ -24,12 +24,18 @@ func New(processes []*process.Process, restarts int) Manager {
 
 // Start set of processes and manage the lifecycle
 func (c *Manager) StartProcesses() {
+	var err error
 	// Start the processes
-	for _, p := range c.Processes {
+	for i, p := range c.Processes {
 		proc := p
+		index := i
 		go func() {
 			*proc = process.New(proc)
-			proc.Start()
+			err = proc.Start()
+			if err != nil {
+				c.dropTheProcess(index)
+				fmt.Printf("Failed to create the process for %s\n", proc.Name)
+			}
 		}()
 	}
 
@@ -39,14 +45,22 @@ func (c *Manager) StartProcesses() {
 
 // Stop the set of processes
 func (c *Manager) StopProcesses() {
+	var err error
 	for _, proc := range c.Processes {
-		proc.Stop()
+		err = proc.Stop()
+		if err != nil {
+			fmt.Printf("Failed to kill the process %s\n", err)
+		}
 	}
 }
 
 // Manages the lifecycle of processes
 func (c *Manager) manageProcesses() {
+	var err error
+	// keep iterating over processes, until all the processes are completed.
+	// or till the processes reach maximum restarts.
 	for {
+		// iterate over the running processes to check their state.
 		for index, runningProcess := range c.Processes {
 			select {
 			case <-runningProcess.Complete:
@@ -58,11 +72,15 @@ func (c *Manager) manageProcesses() {
 					restarts := runningProcess.Restarts
 					*runningProcess = process.New(runningProcess)
 					runningProcess.Restarts = restarts
-					runningProcess.Start()
+					err = runningProcess.Start()
+					if err != nil {
+						c.dropTheProcess(index)
+						fmt.Printf("Failed to create the process for %s\n", runningProcess.Name)
+					}
 					runningProcess.Restarts++
 				} else {
-					fmt.Println(fmt.Sprintf("Process %s reached maximum restarts. Ignoring the process for restart.",
-						runningProcess.Name))
+					fmt.Printf("Process %s reached maximum restarts. Ignoring the process for restart.\n",
+						runningProcess.Name)
 					c.dropTheProcess(index)
 				}
 			default:
@@ -78,5 +96,7 @@ func (c *Manager) manageProcesses() {
 
 // Drops the process from list of managing processes.
 func (c *Manager) dropTheProcess(index int) {
-	c.Processes = append(c.Processes[:index], c.Processes[index+1:]...)
+	if len(c.Processes) > index {
+		c.Processes = append(c.Processes[:index], c.Processes[index+1:]...)
+	}
 }

@@ -4,7 +4,7 @@ Go package to manage the lifecycle of processes. This package helps to start, st
 
 ### Steps to use the package:
 
-Import **github.com/VineethReddy02/process-manager/modules/manager** to use the API's exposed to start & stop the processes.
+Import ```github.com/VineethReddy02/process-manager/modules/manager``` to use the API's exposed to start & stop the processes.
 
 Docs on the exposed API's can be found [here](https://godoc.org/github.com/VineethReddy02/process-manager/modules/manager)
 
@@ -14,6 +14,12 @@ Docs on the exposed API's can be found [here](https://godoc.org/github.com/Vinee
 ./bin/process-manager
 ```
 
+OR
+
+```
+docker run vineeth97/process-manager:1.0
+```
+
 ### TODO's:
 
-1. Add integration tests & modular unit tests.
+1. Add integration tests.
